@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="message"></div>
+<style>
+ul{
+	border: 1px solid #c0c0c0;
+	margin:10px;
+}
+ul.ui li, ol.ui li {
+	color: #4c4c4c;
+	margin-left: 5px;
+	padding: 5px 25px 5px 20px;
+	border-bottom: 1px dotted #c0c0c0;
+	border-left: 4px double #f6988b;
+	list-style:none;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script src="jquery.base64.js"></script>
+<script type="text/javascript">
+$(function() {
+	select();
+    $("body").on('click','li',function(){
+		$(this).attr('contenteditable','true');
+	});
+	$("body").on('keyup','li', function(e) {
+			keys = [];
+	});
+	$("body").on('keydown','li', function(e) {
+			keys.push(e.which);
+			console.log(keys);
+		if($.inArray(13, keys) > -1 && $.inArray(16, keys) > -1) {
+			//INSERT
+			console.log(keys);
+			keys = [];
+			var store = $(this).clone();
+			$(this).before(store);
+			$(this).text('');
+		}
+
+	});
+	$("body").on('click','button',function(){
+		console.log("Called:");
+		query();
+	});
+
+});
+function select(){
+		var queryurl = "http://api.campaigncog.com/v1/campaigns/key/bc7e2d0f8dcb8ff15e1104ce1be2822abee1680c/format/jsonp/";//+"&callback=?";
+		 $.ajax({
+			type: "GET",
+			url:  queryurl,
+			dataType: "jsonp",
+			success: loadList,
+			error: function () {console.log("AJAX ERROR for " + queryurl ); }
+		});
+}
+function loadList(data){
+for(var i = 0; i < data.length; i++){
+		$("<ul class='ui' id='ui-"+i+"'><li></li></ul>").appendTo("body");
+		jQuery.each(data[i], function(key, val) {
+			var store = $("#ui-"+i+" li:last").clone();
+			if(key == 'code')
+				val = $.base64.atob(val, true);
+			store.text(key+": "+val);
+			$("#ui-"+i+" li:last").after(store).addClass(key);
+		});
+}
+	$("li:first").remove();
+}
+
+</script>
+</body>
+</html>
