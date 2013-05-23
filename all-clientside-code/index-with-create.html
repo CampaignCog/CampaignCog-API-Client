@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="message"></div>
+<style>
+ul, #da-content-area{
+	border: 1px solid #c0c0c0;
+	margin:10px;
+}
+.required{
+	color:red;
+}
+ul.ui li, ol.ui li, #da-content-area > div, .da-form-row {
+	color: #4c4c4c;
+	margin-left: 5px;
+	padding: 5px 25px 5px 20px;
+	border-bottom: 1px dotted #c0c0c0;
+	border-left: 4px double #f6988b;
+	list-style:none;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script src="jquery.base64.js"></script>
+<script src="moment.min.js"></script>
+<script type="text/javascript">
+$(function() {
+	$('#html_email').hide();
+	select();
+    $("body").on('click','li',function(){
+		$(this).attr('contenteditable','true');
+	});
+	$("body").on('keyup','li', function(e) {
+			keys = [];
+	});
+	$("body").on('keydown','li', function(e) {
+			keys.push(e.which);
+			console.log(keys);
+		if($.inArray(13, keys) > -1 && $.inArray(16, keys) > -1) {
+			//INSERT
+			console.log(keys);
+			keys = [];
+			var store = $(this).clone();
+			$(this).before(store);
+			$(this).text('');
+		}
+
+	});
+	$('#start_date').val(moment().format('DD MMMM YYYY'));
+	$('input[name=click_tracking]').click(function(){
+
+		if($(this).val() == '1'){
+
+			$('#html_email').fadeIn('slow');
+			$('#ga').fadeIn('slow');
+
+		}else{
+
+
+			$('#html_email').fadeOut('slow');
+			$('#ga').fadeOut('slow');
+
+		}
+
+	});
+});
+function select(){
+		var queryurl = "http://api.campaigncog.com/v1/campaigns/key/bc7e2d0f8dcb8ff15e1104ce1be2822abee1680c/format/jsonp/";//+"&callback=?";
+		 $.ajax({
+			type: "GET",
+			url:  queryurl,
+			dataType: "jsonp",
+			success: loadList,
+			error: function () {console.log("AJAX ERROR for " + queryurl ); }
+		});
+}
+function loadList(data){
+for(var i = 0; i < data.length; i++){
+		$("<ul class='ui' id='ui-"+i+"'><li></li></ul>").appendTo("body");
+		jQuery.each(data[i], function(key, val) {
+			var store = $("#ui-"+i+" li:last").clone();
+			if(key == 'code')
+				val = $.base64.atob(val, true);
+			store.text(key+": "+val);
+			$("#ui-"+i+" li:last").after(store).addClass(key);
+		});
+}
+	$("li:first").remove();
+}
+
+</script>
+	<div id="da-content-area">
+		<div class="da-panel">
+			<div class="da-panel-header">
+				<span class="da-panel-title">
+					New Campaign
+				</span>
+			</div>
+			<div class="da-panel-content">
+
+				<form class="da-form" action="http://api.campaigncog.com/v1/campaigns/" method="post">
+					<input name="key" type="hidden" value="bc7e2d0f8dcb8ff15e1104ce1be2822abee1680c" />
+					<div class="da-form-row">
+						<label>Campaign Name <span class="required">* Required</span></label>
+						<div class="da-form-item large">
+							<input name="name" type="text" />
+						</div>
+					</div>
+
+					<div class="da-form-row">
+						<label>Total Subscribers <span class="required">* Required</span></label>
+						<div class="da-form-item large">
+							<span class="formNote">Number of people this Campaign will be sent to</span>
+							<input name="no_subscriber" type="text" />
+						</div>
+					</div>
+
+					<div class="da-form-row">
+						<label>Start Date <span class="required">* Defaults to current date</span></label>
+						<div class="da-form-item large">
+							<span class="formNote">Date your campaign will be sent</span>
+							<input id="start_date" name="start_date" type="text" />
+						</div>
+					</div>
+
+					<div class="da-form-row" id="subscriber_level_tag">
+						<label>Merge Tag</label>
+						<div class="da-form-item large">
+							<span class="formNote">Your merge tag should be replaced by email addresses by your sending software.</span>
+							<input name="subscriber_level_tag" type="text" />
+						</div>
+					</div>
+
+
+					<div class="da-form-row">
+						<label>Click Tracking</label>
+						<div class="da-form-item">
+								<input type="radio" name="click_tracking" value="1" /> <label>Yes</label><br>
+								<input type="radio" name="click_tracking" value="0" checked="checked" /> <label>No</label>
+						</div>
+					</div>
+
+					<div class="da-form-row" id="html_email">
+						<label>HTML Email</label>
+						<div class="da-form-item">
+							<span class="formNote">We will edit your links in order to track clicks.</span>
+							<textarea style="display:block;width:100%;min-height:100px;" cols="auto" rows="auto" name="email_code"></textarea>
+						</div>
+					</div>
+
+					<div class="da-form-row" id="ga" style="display: none;">
+						<label>Google Analytics</label>
+						<div class="da-form-item">
+								<input type="radio" name="google" value="1" /> <label>Yes</label><br>
+								<input type="radio" name="google" value="0" /> <label>No</label>
+						</div>
+					</div>
+
+					<div class="da-button-row">
+						<input type="reset" class="da-button gray left" value="Reset" />
+						<input type="submit" name="submit" class="da-button blue" value="Create" />
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
